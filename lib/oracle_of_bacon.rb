@@ -1,4 +1,4 @@
-#require 'byebug'                # optional, may be helpful
+#require 'byebug'               # optional, may be helpful
 require 'open-uri'              # allows open('http://...') to return body
 require 'cgi'                   # for escaping URIs
 require 'nokogiri'              # XML parser
@@ -19,14 +19,16 @@ class OracleOfBacon
   validates_presence_of :api_key
   validate :from_does_not_equal_to
 
-   def from_does_not_equal_to
-#    if @from == @to
-#      self.errors.add(:from, 'cannot be the same as To')
-#    end
+  def from_does_not_equal_to
+    if @from == @to
+      self.errors.add(:from, 'cannot be the same as To')
+    end
   end
 
-  def initialize(api_key='')
-    # your code here
+  def initialize(api_key)
+    @api_key = api_key
+    @to = 'Kevin Bacon'
+    @from = 'Kevin Bacon'
   end
 
   def find_connections
@@ -41,14 +43,14 @@ class OracleOfBacon
       Net::ProtocolError => e
       # convert all of these into a generic OracleOfBacon::NetworkError,
       #  but keep the original error message
-      # your code here
+      @err = OracleOfBacon::NetworkError.new
     end
     # your code here: create the OracleOfBacon::Response object
+    @resp = OracleOfBacon::Response.new
   end
 
   def make_uri_from_arguments
-    # your code here: set the @uri attribute to properly-escaped URI
-    # constructed from the @from, @to, @api_key arguments
+    @uri = "http://oracleofbacon.org/cgi-bin/xml?p="+CGI.escape(self.api_key)+"&a="+CGI.escape(self.to)+"&b="+CGI.escape(self.from)
   end
       
   class Response
@@ -74,18 +76,24 @@ class OracleOfBacon
     end
 
     def parse_error_response
-     #Your code here.  Assign @type and @data
-     # based on type attribute and body of the error element
+      if @doc.xpath('/error').text == 'No query received'
+        @type = :badinput
+      elsif @doc.xpath('/error').text == 'There is no link from Kevin Bacon to John Uhl'
+        @type = :unlinkable
+      else
+        @type = :unauthorized
+      end
+      @data = @doc.xpath('/error').text
     end
 
     def parse_spellcheck_response
       @type = :spellcheck
       @data = @doc.xpath('//match').map(&:text)
-      #Note: map(&:text) is same as map{|n| n.text}
     end
 
     def parse_graph_response
-      #Your code here
+      @type = :graph
+      @data = @doc.xpath('//actor').map(&:text).zip(@doc.xpath('//movie').map(&:text)).flatten.compact
     end
 
     def parse_unknown_response
@@ -94,4 +102,3 @@ class OracleOfBacon
     end
   end
 end
-

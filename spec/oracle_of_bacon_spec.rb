@@ -6,7 +6,7 @@ require 'spec_helper'
 
 describe OracleOfBacon do
   before(:all) { FakeWeb.allow_net_connect = false }
-  describe 'instance', :skip => true do
+  describe 'instance', :do
     before(:each) { @orb = OracleOfBacon.new('fake_api_key') }
     describe 'when new' do
       subject { @orb }
@@ -36,8 +36,8 @@ describe OracleOfBacon do
         it { should_not be_valid }
       end
     end
-  end
-  describe 'parsing XML response', :skip => true do
+  :end
+  describe 'parsing XML response', :do
     describe 'for a normal match' do
       subject { OracleOfBacon::Response.new(File.read 'spec/graph_example.xml') }
       its(:type) { should == :graph }
@@ -72,8 +72,8 @@ describe OracleOfBacon do
       its(:type) { should == :unauthorized }
       its(:data) { should match /unauthorized/i }
     end
-  end
-  describe 'constructing URI', :skip => true do
+  :end
+  describe 'constructing URI', :do
     subject do
       oob = OracleOfBacon.new('fake_key')
       oob.to = '3%2 "a' ; oob.from = 'George Clooney'
@@ -84,8 +84,8 @@ describe OracleOfBacon do
     it { should match /p=fake_key/ }
     it { should match /b=George\+Clooney/ }
     it { should match /a=3%252\+%22a/ }
-  end
-  describe 'service connection', :skip => true do
+  :end
+  describe 'service connection', :do
     before(:each) do
       @oob = OracleOfBacon.new
       allow(@oob).to receive(:valid?).and_return(true)
@@ -109,7 +109,5 @@ describe OracleOfBacon do
       lambda { @oob.find_connections }.
         should raise_error(OracleOfBacon::NetworkError)
     end
-  end
-
+  :end
 end
-      
